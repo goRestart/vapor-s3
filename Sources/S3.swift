@@ -34,13 +34,14 @@ public struct S3 {
     return content
   }
   
-  public func put(_ bytes: Bytes, destinationPath: String, acl: ACL) throws {
+  public func put(_ bytes: Bytes, destinationPath: String, acl: ACL) throws -> S3Response {
     let request = try requestBuilder.build(.put, .bytes(bytes), destinationPath, acl)
     let result = try client.put(request.url, request.headers, Body(bytes))
     
     guard [.ok, .continue].contains(result.status) else {
       throw S3Error.invalidResponse(result.makeResponse())
     }
+    return S3Response(url: request.url)
   }
   
   public func delete(destinationPath: String) throws {
