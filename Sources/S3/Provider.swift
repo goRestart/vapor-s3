@@ -44,7 +44,7 @@ extension S3: ConfigInitializable {
       configuration: configuration,
       signer: signer
     )
-    let client = try config.resolveClient()
+    let client = EngineClient.factory
     
     self.init(
       requestBuilder: requestBuilder,

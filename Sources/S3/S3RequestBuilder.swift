@@ -17,11 +17,11 @@ public struct S3RequestBuilder {
     self.signer = signer
   }
   
-  func build(_ httpMethod: HTTPMethod, _ payload: Payload, _ destinationPath: String, _ acl: ACL? = nil) throws -> (url: String, headers: [HeaderKey: String]) {
-    guard let baseUrl = URL(string: "https://\(configuration.bucket)\(amazonS3AwsDomain)") else {
+  func build(_ httpMethod: HTTPMethod, _ payload: Payload, _ destinationPath: String, _ acl: ACL? = nil) throws -> (originalUrl: String, url: String, headers: [HeaderKey: String]) {
+    guard let baseUrl = URL(string: "https://\(configuration.bucket)") else {
       throw S3Error.invalidBucket
     }
-    let url = baseUrl.appendingPathComponent(destinationPath)
+    let url = ("\(baseUrl.absoluteString)\(amazonS3AwsDomain)\(destinationPath)")
     
     var awsHeaders = [String: String]()
     if httpMethod == .put {
@@ -33,11 +33,12 @@ public struct S3RequestBuilder {
     
     let signedHeaders = try signer.authHeaderV4(
       httpMethod: httpMethod,
-      urlString: url.absoluteString, 
+      urlString: url,
       headers: awsHeaders,
       payload: payload
     )
-    return (url: url.absoluteString, make(signedHeaders))
+    let originalUrl = baseUrl.appendingPathComponent(destinationPath).absoluteString
+    return (originalUrl: originalUrl, url: url, make(signedHeaders))
   }
   
   private func make(_ headers: [String: String]) -> [HeaderKey: String] {

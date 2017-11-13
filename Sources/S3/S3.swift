@@ -10,7 +10,7 @@ public enum S3Error: Error {
 }
 
 public struct S3 {
- 
+  
   private let requestBuilder: S3RequestBuilder
   private let client: ClientFactoryProtocol
   
@@ -41,7 +41,10 @@ public struct S3 {
     guard [.ok, .continue].contains(result.status) else {
       throw S3Error.invalidResponse(result.makeResponse())
     }
-    return S3Response(url: request.url)
+    return S3Response(
+      url: request.originalUrl,
+      s3Url: request.url
+    )
   }
   
   public func delete(destinationPath: String) throws {
